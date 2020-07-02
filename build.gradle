@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'application'
 }
 
@@ -6,7 +7,7 @@ group 'nu.mine.mosher.xml'
 version '1.0.0-SNAPSHOT'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_14
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -15,17 +16,9 @@ repositories {
 }
 
 dependencies {
-    // Saxon
     runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release'
-
-    // logging support
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: 'latest.release'
-    implementation group: 'org.slf4j', name: 'jul-to-slf4j', version: 'latest.release'
-    runtimeOnly group: 'org.slf4j', name: 'jcl-over-slf4j', version: 'latest.release'
-    runtimeOnly group: 'org.slf4j', name: 'log4j-over-slf4j', version: 'latest.release'
-    runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: 'latest.release'
 }
 
 application {
-    mainClassName = 'nu.mine.mosher.xml.XsltPipeline'
+    mainClassName = 'nu.mine.mosher.xml.XsltPipelineCli'
 }

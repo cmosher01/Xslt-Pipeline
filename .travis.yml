@@ -1,0 +1,11 @@
+---
+language: java
+jdk: openjdk11
+deploy:
+  provider: bintray
+  file: build/bintray.json
+  user: $BINTRAY_USERNAME
+  key: $BINTRAY_API_KEY
+  skip_cleanup: true
+  on:
+    tags: true

@@ -2,74 +2,65 @@ package nu.mine.mosher.xml.dom;
 
 
 
+import nu.mine.mosher.xml.sax.ErrorHandlerImpl;
 import org.w3c.dom.Document;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 
 
 
 public class DomUtils {
-    public static Document asDom(final URL xml, final boolean validate) throws ParserConfigurationException, IOException, SAXException {
-        final DocumentBuilder builder = documentBuilderFactory(validate).newDocumentBuilder();
-        builder.setErrorHandler(new MyErrorHandler());
+    public static Document empty() throws ParserConfigurationException {
+        return factory(false, Collections.emptyList()).newDocumentBuilder().newDocument();
+    }
+
+    public static Document asDom(final URL xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
+        final DocumentBuilder builder = factory(validate, schemas).newDocumentBuilder();
+        builder.setErrorHandler(new ErrorHandlerImpl());
 
         return builder.parse(xml.toExternalForm());
     }
 
-    private static DocumentBuilderFactory documentBuilderFactory(final boolean validate) throws ParserConfigurationException
-    {
-        final DocumentBuilderFactory factoryDocBuild = DocumentBuilderFactory.newInstance();
+    private static DocumentBuilderFactory factory(final boolean validate, final List<URL> schemas) throws ParserConfigurationException {
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
-        factoryDocBuild.setValidating(validate);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/validation/schema", validate);
+        factory.setValidating(validate);
+        factory.setFeature("http://apache.org/xml/features/validation/schema", validate);
 
-        factoryDocBuild.setNamespaceAware(true);
-        factoryDocBuild.setExpandEntityReferences(true);
-        factoryDocBuild.setCoalescing(true);
-        factoryDocBuild.setIgnoringElementContentWhitespace(false);
-        factoryDocBuild.setIgnoringComments(false);
+        factory.setNamespaceAware(true);
+        factory.setExpandEntityReferences(true);
+        factory.setCoalescing(true);
+        factory.setIgnoringElementContentWhitespace(false);
+        factory.setIgnoringComments(false);
 
-        factoryDocBuild.setFeature("http://apache.org/xml/features/honour-all-schemaLocations", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/warn-on-duplicate-entitydef", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/standard-uri-conformant", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/xinclude", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/validate-annotations", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/validation/schema-full-checking", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/validation/warn-on-duplicate-attdef", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/validation/warn-on-undeclared-elemdef", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/scanner/notify-builtin-refs", true);
-        factoryDocBuild.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+        factory.setFeature("http://apache.org/xml/features/honour-all-schemaLocations", true);
+        factory.setFeature("http://apache.org/xml/features/warn-on-duplicate-entitydef", true);
+        factory.setFeature("http://apache.org/xml/features/standard-uri-conformant", true);
+        factory.setFeature("http://apache.org/xml/features/xinclude", true);
+        factory.setFeature("http://apache.org/xml/features/validate-annotations", true);
+        factory.setFeature("http://apache.org/xml/features/validation/schema-full-checking", true);
+        factory.setFeature("http://apache.org/xml/features/validation/warn-on-duplicate-attdef", true);
+        factory.setFeature("http://apache.org/xml/features/validation/warn-on-undeclared-elemdef", true);
+        factory.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
+        factory.setFeature("http://apache.org/xml/features/scanner/notify-builtin-refs", true);
+        factory.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
 
-        factoryDocBuild.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+        factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
-        return factoryDocBuild;
-    }
-
-    private static class MyErrorHandler implements ErrorHandler
-    {
-        public void warning(SAXParseException spe) throws SAXException
-        {
-            throw new SAXException("WARN " + getParseExceptionInfo(spe), spe);
+        if (!schemas.isEmpty()) {
+            factory.setAttribute(
+                "http://java.sun.com/xml/jaxp/properties/schemaSource",
+                schemas.stream().sequential().map(URL::toExternalForm).toArray(String[]::new));
         }
 
-        public void error(SAXParseException spe) throws SAXException {
-            throw new SAXException("ERROR " + getParseExceptionInfo(spe), spe);
-        }
-
-        public void fatalError(SAXParseException spe) throws SAXException {
-            throw new SAXException("FATAL " + getParseExceptionInfo(spe), spe);
-        }
-
-        private static String getParseExceptionInfo(SAXParseException spe) {
-            return String.format("uri: %s, line: %d, msg: %s", spe.getSystemId(), spe.getLineNumber(), spe.getMessage());
-        }
+        return factory;
     }
 }

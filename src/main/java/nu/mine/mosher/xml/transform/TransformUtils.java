@@ -19,8 +19,7 @@ import java.util.Map;
 
 
 
-public class TransformUtils
-{
+public class TransformUtils {
     public static Node transform(final Node dom, final URL urlXslt, final Map<String, Object> params, boolean initialTemplate) throws TransformerException {
         final TransformerFactory factory = TransformerFactory.newInstance();
         if (initialTemplate) {
@@ -30,6 +29,16 @@ public class TransformUtils
         final Transformer transform = factory.newTransformer(new StreamSource(urlXslt.toExternalForm()));
         configTransformer(transform, false);
         params.forEach(transform::setParameter);
+
+        final DOMResult result = new DOMResult();
+        transform.transform(new DOMSource(dom), result);
+        return result.getNode();
+    }
+
+    public static Node identity(final Node dom) throws TransformerException {
+        final TransformerFactory factory = TransformerFactory.newInstance();
+        final Transformer transform = factory.newTransformer();
+        configTransformer(transform, false);
 
         final DOMResult result = new DOMResult();
         transform.transform(new DOMSource(dom), result);

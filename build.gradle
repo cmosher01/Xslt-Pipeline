@@ -1,24 +1,10 @@
-plugins {
-    id 'java-library'
-    id 'application'
+def inc(module) {
+    apply from: "${projectDir}/gradle/${module}.gradle"
 }
 
-group 'nu.mine.mosher.xml'
-version '1.0.0-SNAPSHOT'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-}
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
-
-dependencies {
-    runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release'
-}
-
-application {
-    mainClassName = 'nu.mine.mosher.xml.XsltPipelineCli'
-}
+inc('version')
+inc('project')
+inc('dependencies')
+inc('srcjar')
+inc('maven')
+inc('bintray')

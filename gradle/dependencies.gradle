@@ -5,6 +5,5 @@ repositories {
 
 dependencies {
     implementation group: 'nu.mine.mosher.gnopt', name: 'Gnopt', version: 'latest.integration'
-    runtimeOnly group: 'xerces', name: 'xercesImpl', version: 'latest.release' // TODO see if JDK14 works instead of including external xerces
     runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release'
 }

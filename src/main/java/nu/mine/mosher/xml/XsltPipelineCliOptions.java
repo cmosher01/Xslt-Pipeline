@@ -2,41 +2,22 @@ package nu.mine.mosher.xml;
 
 
 
-import nu.mine.mosher.xml.dom.DomUtils;
-import nu.mine.mosher.xml.transform.TransformUtils;
-import nu.mine.mosher.xml.validation.ValidationUtils;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.BufferedOutputStream;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 
 
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class XsltPipelineCliOptions {
-    public Node dom = null;
-    public boolean validation = false;
-    public List<URL> schema = new ArrayList<>();
-    public boolean initialTemplate = false;
-    public Map<String, Object> params = new HashMap<>();
-    public boolean pretty = true;
-    public boolean trace = false;
+    private final XsltPipeline pipeline = new XsltPipeline();
 
 
 
@@ -79,137 +60,70 @@ public class XsltPipelineCliOptions {
     }
 
     public void trace(final Optional<String> b) {
-        this.trace = parseBoolean("trace", b);
-        traceHR();
-        traceBool("trace", this.trace);
+        this.pipeline.trace(parseBoolean("trace", b));
     }
 
     public void pretty(final Optional<String> b) {
-        this.pretty = parseBoolean("pretty", b);
-        traceHR();
-        traceBool("pretty", this.pretty);
+        this.pipeline.pretty(parseBoolean("pretty", b));
     }
 
     public void dom(final Optional<String> source) throws ParserConfigurationException, IOException, SAXException, TransformerException {
-        traceHR();
         if (source.isPresent()) {
             final URL url = asUrl(source.get());
-            this.dom = DomUtils.asDom(url, this.validation, this.schema);
-            traceUrl("load dom", url);
-            traceHR();
+            this.pipeline.dom(url);
         } else {
-            this.dom = DomUtils.empty();
-            trace("generate empty dom");
-            traceHR();
+            this.pipeline.dom();
         }
-        traceXml(this.dom);
     }
 
     public void validation(final Optional<String> b) {
-        this.validation = parseBoolean("validation", b);
-        traceHR();
-        traceBool("validation", this.validation);
+        this.pipeline.validation(parseBoolean("validation", b));
     }
 
     public void it(final Optional<String> b) {
-        this.initialTemplate = parseBoolean("it", b);
-        traceHR();
-        traceBool("initial-template", this.initialTemplate);
+        this.pipeline.initialTemplate(parseBoolean("it", b));
     }
 
     public void xsd(final Optional<String> source) throws IOException, ParserConfigurationException, SAXException, TransformerException {
-        traceHR();
         if (source.isPresent()) {
             final URL url = asUrl(source.get());
-            this.schema.add(url);
-            traceUrl("register xsd", url);
-            traceHR();
-            traceXml(DomUtils.asDom(url, false, Collections.emptyList()));
+            this.pipeline.xsd(url);
         } else {
-            this.schema = new ArrayList<>();
-            trace("dropping all registered schema");
+            this.pipeline.xsd();
         }
     }
 
     public void xslt(final Optional<String> source) throws IOException, TransformerException, ParserConfigurationException, SAXException {
-        traceHR();
         if (source.isPresent()) {
             final URL url = asUrl(source.get());
-            traceUrl("transform with xslt", url);
-            traceHR();
-            traceXml(DomUtils.asDom(url, false, Collections.emptyList()));
-            this.dom = TransformUtils.transform(this.dom, url, this.params, this.initialTemplate);
-            this.params = new HashMap<>();
+            this.pipeline.xslt(url);
         } else {
-            trace("identity transform");
-            this.dom = TransformUtils.identity(this.dom);
+            this.pipeline.xslt();
         }
-        traceHR();
-        traceXml(this.dom);
     }
 
-    public void validate(final Optional<String> notAllowed) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+    public void validate(final Optional<String> notAllowed) throws IOException, SAXException, TransformerException {
         if (notAllowed.isPresent()) {
-            traceHR();
             throw new IllegalStateException("No value is allowed for option --validate");
         }
-        for (final URL xsd : this.schema) {
-            traceHR();
-            traceUrl("validate with xsd", xsd);
-            this.dom = ValidationUtils.validate(this.dom, xsd);
-            traceHR();
-            traceXml(this.dom);
-        }
+        this.pipeline.validate();
     }
 
     public void param(final Optional<String> keyColonValue) {
-        traceHR();
         if (!(keyColonValue.isPresent() && keyColonValue.get().contains(":"))) {
             throw new IllegalStateException("Invalid format for option --param=key:value");
         }
         final String[] r2 = Arrays.copyOf(keyColonValue.get().split(":", 2), 2);
-        this.params.put(r2[0], Objects.isNull(r2[1]) ? "" : r2[1]);
-        trace(String.format("parameter:  %s:%s", r2[0], this.params.get(r2[0])));
+        this.pipeline.param(r2[0], Objects.isNull(r2[1]) ? "" : r2[1]);
+    }
+
+    void serialize(final BufferedOutputStream out) throws IOException, TransformerException {
+        this.pipeline.serialize(out);
     }
 
 
 
-    private void traceXml(final Node dom) throws IOException, TransformerException {
-        if (!this.trace) {
-            return;
-        }
-        TransformUtils.serialize(dom, new BufferedOutputStream(new FileOutputStream(FileDescriptor.err)), true);
-    }
-
-    private void traceUrl(final String label, final URL url) {
-        if (!this.trace) {
-            return;
-        }
-        System.err.println(label+": "+url);
-    }
-
-    private void traceBool(final String label, final boolean b) {
-        if (!this.trace) {
-            return;
-        }
-        System.err.println(label+": "+b);
-    }
-
-    private void traceHR() {
-        if (!this.trace) {
-            return;
-        }
-        System.err.println("------------------------------------------------------------------------------------------------");
-    }
-
-    private void trace(final String message) {
-        if (!this.trace) {
-            return;
-        }
-        System.err.println(message);
-    }
-
-    private static boolean parseBoolean(final String option, final Optional<String> b) {
+    static boolean parseBoolean(final String option, final Optional<String> b) {
         boolean r;
         if (b.isPresent() && b.get().equalsIgnoreCase("true")) {
             r = true;
@@ -221,7 +135,7 @@ public class XsltPipelineCliOptions {
         return r;
     }
 
-    private static URL asUrl(final String pathOrUrl) throws IOException
+    static URL asUrl(final String pathOrUrl) throws IOException
     {
         Throwable urlExcept;
         try {

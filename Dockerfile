@@ -1,4 +1,4 @@
-FROM amazoncorretto:11 AS build
+FROM openjdk:14-oracle AS build
 
 MAINTAINER Christopher A. Mosher <cmosher01@gmail.com>
 
@@ -20,13 +20,11 @@ RUN ./gradlew build
 
 
 
-FROM amazoncorretto:11
+FROM openjdk:14-oracle
 
 USER root
 ENV HOME /root
 WORKDIR $HOME
-
-RUN yum -y install tar shadow-utils
 
 COPY --from=build /root/build/distributions/*.tar ./
 RUN tar xvf *.tar --strip-components=1 -C /usr/local

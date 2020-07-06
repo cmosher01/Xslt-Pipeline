@@ -5,5 +5,7 @@ repositories {
 
 dependencies {
     implementation group: 'nu.mine.mosher.gnopt', name: 'Gnopt', version: 'latest.integration'
+
+    runtimeOnly group: 'xerces', name: 'xercesImpl', version: 'latest.release'
     runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release'
 }

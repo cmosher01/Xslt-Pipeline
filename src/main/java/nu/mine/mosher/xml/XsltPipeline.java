@@ -1,7 +1,6 @@
 package nu.mine.mosher.xml;
 
 
-
 import nu.mine.mosher.xml.dom.DomUtils;
 import nu.mine.mosher.xml.transform.TransformUtils;
 import nu.mine.mosher.xml.validation.ValidationUtils;
@@ -15,29 +14,8 @@ import java.net.URL;
 import java.util.*;
 
 
-
 @SuppressWarnings({"unused"})
 public class XsltPipeline {
-    private Node dom;
-    private boolean validation;
-    private List<URL> schema = new ArrayList<>();
-    private boolean initialTemplate;
-    private Map<String, Object> params = new HashMap<>();
-    private boolean pretty = true;
-    private boolean trace;
-
-    public void trace(final boolean trace) {
-        this.trace = trace;
-        traceHR();
-        traceBool("trace", this.trace);
-    }
-
-    public void pretty(final boolean pretty) {
-        this.pretty = pretty;
-        traceHR();
-        traceBool("pretty", this.pretty);
-    }
-
     public void dom(final URL url) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         traceHR();
         this.dom = DomUtils.asDom(url, this.validation, this.schema);
@@ -54,16 +32,53 @@ public class XsltPipeline {
         traceXml(this.dom);
     }
 
-    public void validation(final boolean validation) {
-        this.validation = validation;
-        traceHR();
-        traceBool("validation", this.validation);
-    }
-
     public void initialTemplate(final boolean initialTemplate) {
         this.initialTemplate = initialTemplate;
         traceHR();
         traceBool("initial-template", this.initialTemplate);
+    }
+
+    public void param(final String key, final Object value) {
+        traceHR();
+        final String s = Objects.toString(value);
+        this.params.put(key, s);
+        trace(String.format("parameter:  %s:%s", key, s));
+    }
+
+    public void pretty(final boolean pretty) {
+        this.pretty = pretty;
+        traceHR();
+        traceBool("pretty", this.pretty);
+    }
+
+    public void serialize(final BufferedOutputStream out) throws IOException, TransformerException {
+        traceHR();
+        trace("final output");
+        traceHR();
+        System.err.flush();
+        TransformUtils.serialize(this.dom, out, this.pretty);
+    }
+
+    public void trace(final boolean trace) {
+        this.trace = trace;
+        traceHR();
+        traceBool("trace", this.trace);
+    }
+
+    public void validate() throws IOException, SAXException, TransformerException {
+        for (final URL xsd : this.schema) {
+            traceHR();
+            traceUrl("validate with xsd", xsd);
+            this.dom = ValidationUtils.validate(this.dom, xsd);
+            traceHR();
+            traceXml(this.dom);
+        }
+    }
+
+    public void validation(final boolean validation) {
+        this.validation = validation;
+        traceHR();
+        traceBool("validation", this.validation);
     }
 
     public void xsd(final URL source) throws IOException, ParserConfigurationException, SAXException, TransformerException {
@@ -71,7 +86,7 @@ public class XsltPipeline {
         this.schema.add(source);
         traceUrl("register xsd", source);
         traceHR();
-        traceXml(DomUtils.asDom(source, false, Collections.emptyList()));
+        traceXml(source);
     }
 
     public void xsd() {
@@ -84,7 +99,7 @@ public class XsltPipeline {
         traceHR();
         traceUrl("transform with xslt", source);
         traceHR();
-        traceXml(DomUtils.asDom(source, false, Collections.emptyList()));
+        traceXml(source);
         this.dom = TransformUtils.transform(this.dom, source, this.params, this.initialTemplate);
         this.params = new HashMap<>();
         traceHR();
@@ -99,31 +114,22 @@ public class XsltPipeline {
         traceXml(this.dom);
     }
 
-    public void validate() throws IOException, SAXException, TransformerException {
-        for (final URL xsd : this.schema) {
-            traceHR();
-            traceUrl("validate with xsd", xsd);
-            this.dom = ValidationUtils.validate(this.dom, xsd);
-            traceHR();
-            traceXml(this.dom);
+
+
+    private Node dom;
+    private boolean initialTemplate;
+    private Map<String, Object> params = new HashMap<>();
+    private boolean pretty = true;
+    private List<URL> schema = new ArrayList<>();
+    private boolean trace;
+    private boolean validation;
+
+    private void traceXml(final URL source) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+        if (!this.trace) {
+            return;
         }
+        traceXml(DomUtils.asDom(source, false, Collections.emptyList()));
     }
-
-    public void param(final String key, final Object value) {
-        traceHR();
-        final String s = Objects.toString(value);
-        this.params.put(key, s);
-        trace(String.format("parameter:  %s:%s", key, s));
-    }
-
-    public void serialize(final BufferedOutputStream out) throws IOException, TransformerException {
-        traceHR();
-        trace("final output");
-        traceHR();
-        System.err.flush();
-        TransformUtils.serialize(this.dom, out, this.pretty);
-    }
-
 
     private void traceXml(final Node dom) throws IOException, TransformerException {
         if (!this.trace) {
@@ -136,14 +142,14 @@ public class XsltPipeline {
         if (!this.trace) {
             return;
         }
-        System.err.println(label+": "+url);
+        System.err.println(label + ": " + url);
     }
 
     private void traceBool(final String label, final boolean b) {
         if (!this.trace) {
             return;
         }
-        System.err.println(label+": "+b);
+        System.err.println(label + ": " + b);
     }
 
     private void traceHR() {

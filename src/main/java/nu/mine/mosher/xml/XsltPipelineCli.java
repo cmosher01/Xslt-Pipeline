@@ -1,7 +1,6 @@
 package nu.mine.mosher.xml;
 
 
-
 import nu.mine.mosher.gnopt.Gnopt;
 
 import javax.xml.transform.TransformerException;

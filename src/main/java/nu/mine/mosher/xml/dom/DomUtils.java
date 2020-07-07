@@ -1,33 +1,30 @@
 package nu.mine.mosher.xml.dom;
 
 
-
 import nu.mine.mosher.xml.sax.ErrorHandlerImpl;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-
+import java.util.*;
 
 
 public class DomUtils {
-    public static Document empty() throws ParserConfigurationException {
-        return factory(false, Collections.emptyList()).newDocumentBuilder().newDocument();
-    }
-
     public static Document asDom(final URL xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
         final DocumentBuilder builder = factory(validate, schemas).newDocumentBuilder();
         builder.setErrorHandler(new ErrorHandlerImpl());
 
         return builder.parse(xml.toExternalForm());
     }
+
+    public static Document empty() throws ParserConfigurationException {
+        return factory(false, Collections.emptyList()).newDocumentBuilder().newDocument();
+    }
+
+
 
     private static DocumentBuilderFactory factory(final boolean validate, final List<URL> schemas) throws ParserConfigurationException {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -49,9 +46,11 @@ public class DomUtils {
         factory.setFeature("http://apache.org/xml/features/validation/schema-full-checking", true);
         factory.setFeature("http://apache.org/xml/features/validation/warn-on-duplicate-attdef", true);
         factory.setFeature("http://apache.org/xml/features/validation/warn-on-undeclared-elemdef", true);
-        factory.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
-        factory.setFeature("http://apache.org/xml/features/scanner/notify-builtin-refs", true);
         factory.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+
+        //These options often crash Xerces (as of 2.12.0):
+        //factory.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
+        //factory.setFeature("http://apache.org/xml/features/scanner/notify-builtin-refs", true);
 
         factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
 

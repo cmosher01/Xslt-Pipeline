@@ -1,26 +1,18 @@
 package nu.mine.mosher.xml;
 
 
-
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
 import java.nio.file.Paths;
 import java.util.*;
 
 
-
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class XsltPipelineCliOptions {
-    private final XsltPipeline pipeline = new XsltPipeline();
-
-
-
     public static void help(final Optional<String> unused) {
         System.err.println("Usage:");
         System.err.println();
@@ -59,14 +51,6 @@ public class XsltPipelineCliOptions {
         System.err.println("    turn on or off tracing of statements on stderr; default: false");
     }
 
-    public void trace(final Optional<String> b) {
-        this.pipeline.trace(parseBoolean("trace", b));
-    }
-
-    public void pretty(final Optional<String> b) {
-        this.pipeline.pretty(parseBoolean("pretty", b));
-    }
-
     public void dom(final Optional<String> source) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         if (source.isPresent()) {
             final URL url = asUrl(source.get());
@@ -76,12 +60,35 @@ public class XsltPipelineCliOptions {
         }
     }
 
-    public void validation(final Optional<String> b) {
-        this.pipeline.validation(parseBoolean("validation", b));
-    }
-
     public void it(final Optional<String> b) {
         this.pipeline.initialTemplate(parseBoolean("it", b));
+    }
+
+    public void param(final Optional<String> keyColonValue) {
+        if (!(keyColonValue.isPresent() && keyColonValue.get().contains(":"))) {
+            throw new IllegalStateException("Invalid format for option --param=key:value");
+        }
+        final String[] r2 = Arrays.copyOf(keyColonValue.get().split(":", 2), 2);
+        this.pipeline.param(r2[0], Objects.isNull(r2[1]) ? "" : r2[1]);
+    }
+
+    public void pretty(final Optional<String> b) {
+        this.pipeline.pretty(parseBoolean("pretty", b));
+    }
+
+    public void trace(final Optional<String> b) {
+        this.pipeline.trace(parseBoolean("trace", b));
+    }
+
+    public void validate(final Optional<String> notAllowed) throws IOException, SAXException, TransformerException {
+        if (notAllowed.isPresent()) {
+            throw new IllegalStateException("No value is allowed for option --validate");
+        }
+        this.pipeline.validate();
+    }
+
+    public void validation(final Optional<String> b) {
+        this.pipeline.validation(parseBoolean("validation", b));
     }
 
     public void xsd(final Optional<String> source) throws IOException, ParserConfigurationException, SAXException, TransformerException {
@@ -102,41 +109,11 @@ public class XsltPipelineCliOptions {
         }
     }
 
-    public void validate(final Optional<String> notAllowed) throws IOException, SAXException, TransformerException {
-        if (notAllowed.isPresent()) {
-            throw new IllegalStateException("No value is allowed for option --validate");
-        }
-        this.pipeline.validate();
-    }
-
-    public void param(final Optional<String> keyColonValue) {
-        if (!(keyColonValue.isPresent() && keyColonValue.get().contains(":"))) {
-            throw new IllegalStateException("Invalid format for option --param=key:value");
-        }
-        final String[] r2 = Arrays.copyOf(keyColonValue.get().split(":", 2), 2);
-        this.pipeline.param(r2[0], Objects.isNull(r2[1]) ? "" : r2[1]);
-    }
-
     void serialize(final BufferedOutputStream out) throws IOException, TransformerException {
         this.pipeline.serialize(out);
     }
 
-
-
-    static boolean parseBoolean(final String option, final Optional<String> b) {
-        boolean r;
-        if (b.isPresent() && b.get().equalsIgnoreCase("true")) {
-            r = true;
-        } else if (b.isPresent() && b.get().equalsIgnoreCase("false")) {
-            r = false;
-        } else {
-            throw new IllegalArgumentException(String.format("Invalid value for option --%s={true|false}", option));
-        }
-        return r;
-    }
-
-    static URL asUrl(final String pathOrUrl) throws IOException
-    {
+    static URL asUrl(final String pathOrUrl) throws IOException {
         Throwable urlExcept;
         try {
             return new URI(pathOrUrl).toURL();
@@ -156,4 +133,20 @@ public class XsltPipelineCliOptions {
         except.addSuppressed(urlExcept);
         throw except;
     }
+
+    static boolean parseBoolean(final String option, final Optional<String> b) {
+        boolean r;
+        if (b.isPresent() && b.get().equalsIgnoreCase("true")) {
+            r = true;
+        } else if (b.isPresent() && b.get().equalsIgnoreCase("false")) {
+            r = false;
+        } else {
+            throw new IllegalArgumentException(String.format("Invalid value for option --%s={true|false}", option));
+        }
+        return r;
+    }
+
+
+
+    private final XsltPipeline pipeline = new XsltPipeline();
 }

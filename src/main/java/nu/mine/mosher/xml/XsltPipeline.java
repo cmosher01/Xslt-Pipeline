@@ -55,6 +55,7 @@ public class XsltPipeline {
         traceHR();
         trace("final output");
         traceHR();
+        traceXml(this.dom);
         System.err.flush();
         TransformUtils.serialize(this.dom, out, this.pretty);
     }
@@ -111,6 +112,14 @@ public class XsltPipeline {
         trace("identity transform");
         this.dom = TransformUtils.identity(this.dom);
         traceHR();
+        traceXml(this.dom);
+    }
+
+    public Node accessDom() {
+        return this.dom;
+    }
+
+    public void traceDom() throws IOException, TransformerException {
         traceXml(this.dom);
     }
 

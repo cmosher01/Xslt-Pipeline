@@ -3,21 +3,29 @@ package nu.mine.mosher.xml.dom;
 
 import nu.mine.mosher.xml.sax.ErrorHandlerImpl;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.*;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
 
 public class DomUtils {
+    public static Document asDom(final BufferedInputStream xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
+        return asDom(new InputSource(xml), validate, schemas);
+    }
+
     public static Document asDom(final URL xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
+        return asDom(new InputSource(xml.toExternalForm()), validate, schemas);
+    }
+
+    private static Document asDom(final InputSource xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
         final DocumentBuilder builder = factory(validate, schemas).newDocumentBuilder();
         builder.setErrorHandler(new ErrorHandlerImpl());
 
-        return builder.parse(xml.toExternalForm());
+        return builder.parse(xml);
     }
 
     public static Document empty() throws ParserConfigurationException {

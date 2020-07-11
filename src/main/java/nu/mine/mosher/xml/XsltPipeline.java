@@ -16,6 +16,14 @@ import java.util.*;
 
 @SuppressWarnings({"unused"})
 public class XsltPipeline {
+    public void dom(final BufferedInputStream in) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+        traceHR();
+        this.dom = DomUtils.asDom(in, this.validation, this.schema);
+        trace("load dom from input stream");
+        traceHR();
+        traceXml(this.dom);
+    }
+
     public void dom(final URL url) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         traceHR();
         this.dom = DomUtils.asDom(url, this.validation, this.schema);

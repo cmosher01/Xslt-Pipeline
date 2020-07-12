@@ -46,7 +46,9 @@ public class XsltPipelineCliOptions {
         System.err.println("    sets parameter for XSLT processing");
 
         System.err.println("--pretty={true|false}");
-        System.err.println("    indent final output XML; default: true");
+        System.err.println("    indent final output XML; default: false");
+        System.err.println("--xmldecl={true|false}");
+        System.err.println("    include '<?xml ... ?>' declaration in final output XML; default: false");
         System.err.println("--trace={true|false}");
         System.err.println("    turn on or off tracing of statements on stderr; default: false");
     }
@@ -74,6 +76,10 @@ public class XsltPipelineCliOptions {
 
     public void pretty(final Optional<String> b) {
         this.pipeline.pretty(parseBoolean("pretty", b));
+    }
+
+    public void xmldecl(final Optional<String> b) {
+        this.pipeline.xmldecl(parseBoolean("xmldecl", b));
     }
 
     public void trace(final Optional<String> b) {

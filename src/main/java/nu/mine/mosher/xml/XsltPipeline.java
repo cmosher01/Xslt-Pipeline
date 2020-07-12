@@ -59,13 +59,19 @@ public class XsltPipeline {
         traceBool("pretty", this.pretty);
     }
 
+    public void xmldecl(final boolean xmldecl) {
+        this.xmldecl = xmldecl;
+        traceHR();
+        traceBool("xmldecl", this.xmldecl);
+    }
+
     public void serialize(final BufferedOutputStream out) throws IOException, TransformerException {
         traceHR();
         trace("final output");
         traceHR();
         traceXml(this.dom);
         System.err.flush();
-        TransformUtils.serialize(this.dom, out, this.pretty);
+        TransformUtils.serialize(this.dom, out, this.pretty, this.xmldecl);
     }
 
     public void trace(final boolean trace) {
@@ -136,7 +142,8 @@ public class XsltPipeline {
     private Node dom;
     private boolean initialTemplate;
     private Map<String, Object> params = new HashMap<>();
-    private boolean pretty = true;
+    private boolean pretty;
+    private boolean xmldecl;
     private List<URL> schema = new ArrayList<>();
     private boolean trace;
     private boolean validation;
@@ -152,7 +159,7 @@ public class XsltPipeline {
         if (!this.trace) {
             return;
         }
-        TransformUtils.serialize(dom, new BufferedOutputStream(new FileOutputStream(FileDescriptor.err)), true);
+        TransformUtils.serialize(dom, new BufferedOutputStream(new FileOutputStream(FileDescriptor.err)), true, true);
     }
 
     private void traceUrl(final String label, final URL url) {

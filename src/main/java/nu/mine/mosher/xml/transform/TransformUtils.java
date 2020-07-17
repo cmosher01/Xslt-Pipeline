@@ -33,6 +33,7 @@ public class TransformUtils {
 
     public static Node transform(final Node dom, final URL urlXslt, final Map<String, Object> params, boolean initialTemplate) throws TransformerException {
         final TransformerFactory factory = TransformerFactory.newInstance();
+
         if (initialTemplate) {
             factory.setAttribute("http://saxon.sf.net/feature/initialTemplate", "{http://www.w3.org/1999/XSL/Transform}initial-template");
         }

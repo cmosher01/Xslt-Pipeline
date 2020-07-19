@@ -18,13 +18,15 @@ public class TransformUtils {
         configTransformer(transform);
 
         final DOMResult result = new DOMResult();
-        transform.transform(new DOMSource(dom), result);
+        result.setSystemId(dom.getBaseURI());
+        transform.transform(new DOMSource(dom, dom.getBaseURI()), result);
         return result.getNode();
     }
 
     public static void serialize(final Node dom, final BufferedOutputStream to, final boolean pretty, final boolean xmldecl) throws IOException, TransformerException {
-        final DOMSource source = new DOMSource(dom);
+        final DOMSource source = new DOMSource(dom, dom.getBaseURI());
         final StreamResult result = new StreamResult(to);
+        result.setSystemId(dom.getBaseURI());
         final Transformer transformIdentity = TransformerFactory.newInstance().newTransformer();
         configTransformer(transformIdentity, pretty, xmldecl);
         transformIdentity.transform(source, result);
@@ -43,7 +45,8 @@ public class TransformUtils {
         params.forEach(transform::setParameter);
 
         final DOMResult result = new DOMResult();
-        transform.transform(new DOMSource(dom), result);
+        result.setSystemId(dom.getBaseURI());
+        transform.transform(new DOMSource(dom, dom.getBaseURI()), result);
         return result.getNode();
     }
 

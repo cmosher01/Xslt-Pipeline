@@ -15,9 +15,10 @@ import java.net.URL;
 public class ValidationUtils {
     public static Node validate(final Node dom, final URL urlXsd) throws SAXException, IOException {
         final DOMResult augmented = new DOMResult();
+        augmented.setSystemId(dom.getBaseURI());
         final Validator validator = schema(urlXsd).newValidator();
         validator.setErrorHandler(new ErrorHandlerImpl());
-        validator.validate(new DOMSource(dom), augmented);
+        validator.validate(new DOMSource(dom, dom.getBaseURI()), augmented);
         return augmented.getNode();
     }
 

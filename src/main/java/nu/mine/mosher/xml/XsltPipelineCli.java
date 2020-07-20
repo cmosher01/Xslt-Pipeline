@@ -21,7 +21,7 @@ public class XsltPipelineCli {
         System.err.flush();
     }
 
-    public static void help(final Optional<String> unused) {
+    public void help(final Optional<String> unused) {
         System.err.println("Usage:");
         System.err.println();
         System.err.println("xslt-pipeline statement...");

@@ -1,10 +1,49 @@
-def inc(module) {
-    apply from: "${projectDir}/gradle/${module}.gradle"
+plugins {
+    id 'application'
+    id 'java-library'
+    id 'maven-publish'
 }
 
-inc('version')
-inc('project')
-inc('dependencies')
-inc('srcjar')
-inc('maven')
-inc('bintray')
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation group: 'nu.mine.mosher.gnopt', name: 'Gnopt', version: 'latest.integration'
+
+    runtimeOnly group: 'xerces', name: 'xercesImpl', version: 'latest.release', {
+        exclude group: 'xml-apis'
+    }
+    runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release'
+}
+
+application {
+    mainClassName = 'nu.mine.mosher.xml.XsltPipelineCli'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of 11
+        vendor = JvmVendorSpec.AMAZON
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set 'sources'
+}
+tasks.assemble.dependsOn tasks.sourcesJar
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+tasks.assemble.dependsOn tasks.generatePomFileForMavenPublication
+
+group = 'nu.mine.mosher.xml'
+
+version = '1.1.8'

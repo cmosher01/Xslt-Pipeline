@@ -1,6 +1,0 @@
-image: Ubuntu
-
-stack: jdk 11
-
-build_script:
-  - ./gradlew --console=plain --info build

@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.*;
 
 
-public class DomUtils {
+public final class DomUtils {
     public static Document asDom(final BufferedInputStream xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
         return asDom(new InputSource(xml), validate, schemas);
     }
@@ -22,7 +22,7 @@ public class DomUtils {
     }
 
     private static Document asDom(final InputSource xml, final boolean validate, final List<URL> schemas) throws ParserConfigurationException, IOException, SAXException {
-        final DocumentBuilder builder = factory(validate, schemas).newDocumentBuilder();
+        final var builder = factory(validate, schemas).newDocumentBuilder();
         builder.setErrorHandler(new ErrorHandlerImpl());
 
         return builder.parse(xml);
@@ -35,7 +35,7 @@ public class DomUtils {
 
 
     private static DocumentBuilderFactory factory(final boolean validate, final List<URL> schemas) throws ParserConfigurationException {
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        final var factory = DocumentBuilderFactory.newInstance();
 
         factory.setValidating(validate);
         factory.setFeature("http://apache.org/xml/features/validation/schema", validate);

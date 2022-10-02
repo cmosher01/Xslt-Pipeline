@@ -14,9 +14,10 @@ import java.net.URL;
 
 public class ValidationUtils {
     public static Node validate(final Node dom, final URL urlXsd) throws SAXException, IOException {
-        final DOMResult augmented = new DOMResult();
+        final var augmented = new DOMResult();
         augmented.setSystemId(dom.getBaseURI());
-        final Validator validator = schema(urlXsd).newValidator();
+
+        final var validator = schema(urlXsd).newValidator();
         validator.setErrorHandler(new ErrorHandlerImpl());
         validator.validate(new DOMSource(dom, dom.getBaseURI()), augmented);
         return augmented.getNode();
@@ -29,7 +30,6 @@ public class ValidationUtils {
     }
 
     private static SchemaFactory factory() {
-        final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        return factory;
+        return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
     }
 }

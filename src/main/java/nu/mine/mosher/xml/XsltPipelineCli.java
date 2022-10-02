@@ -15,7 +15,7 @@ import java.util.*;
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class XsltPipelineCli {
     public static void main(final String... args) throws IOException, TransformerException, Gnopt.InvalidOption {
-        final XsltPipelineCli cli = Gnopt.process(XsltPipelineCli.class, args);
+        final var cli = Gnopt.process(XsltPipelineCli.class, args);
         cli.serialize(new BufferedOutputStream(new FileOutputStream(FileDescriptor.out)));
         System.out.flush();
         System.err.flush();
@@ -63,7 +63,7 @@ public class XsltPipelineCli {
 
     public void dom(final Optional<String> source) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         if (source.isPresent()) {
-            final URL url = asUrl(source.get());
+            final var url = asUrl(source.get());
             this.pipeline.dom(url);
         } else {
             this.pipeline.dom();
@@ -78,7 +78,7 @@ public class XsltPipelineCli {
         if (!(keyColonValue.isPresent() && keyColonValue.get().contains(":"))) {
             throw new IllegalStateException("Invalid format for option --param=key:value");
         }
-        final String[] r2 = Arrays.copyOf(keyColonValue.get().split(":", 2), 2);
+        final var r2 = Arrays.copyOf(keyColonValue.get().split(":", 2), 2);
         this.pipeline.param(r2[0], Objects.isNull(r2[1]) ? "" : r2[1]);
     }
 
@@ -107,7 +107,7 @@ public class XsltPipelineCli {
 
     public void xsd(final Optional<String> source) throws IOException, ParserConfigurationException, SAXException, TransformerException {
         if (source.isPresent()) {
-            final URL url = asUrl(source.get());
+            final var url = asUrl(source.get());
             this.pipeline.xsd(url);
         } else {
             this.pipeline.xsd();
@@ -116,7 +116,7 @@ public class XsltPipelineCli {
 
     public void xslt(final Optional<String> source) throws IOException, TransformerException, ParserConfigurationException, SAXException {
         if (source.isPresent()) {
-            final URL url = asUrl(source.get());
+            final var url = asUrl(source.get());
             this.pipeline.xslt(url);
         } else {
             this.pipeline.xslt();
@@ -131,28 +131,28 @@ public class XsltPipelineCli {
     }
 
     private static URL asUrl(final String pathOrUrl) throws IOException {
-        Throwable urlExcept;
+        final Throwable urlExcept;
         try {
             return new URI(pathOrUrl).toURL();
         } catch (final Throwable e) {
             urlExcept = e;
         }
 
-        Throwable pathExcept;
+        final Throwable pathExcept;
         try {
             return Paths.get(pathOrUrl).toUri().toURL();
         } catch (final Throwable e) {
             pathExcept = e;
         }
 
-        final IOException except = new IOException("Invalid path or URL: " + pathOrUrl);
+        final var except = new IOException("Invalid path or URL: " + pathOrUrl);
         except.addSuppressed(pathExcept);
         except.addSuppressed(urlExcept);
         throw except;
     }
 
     private static boolean parseBoolean(final String option, final Optional<String> b) {
-        boolean r;
+        final boolean r;
         if (b.isPresent() && b.get().equalsIgnoreCase("true")) {
             r = true;
         } else if (b.isPresent() && b.get().equalsIgnoreCase("false")) {

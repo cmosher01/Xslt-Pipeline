@@ -1,33 +1,35 @@
 plugins {
     id 'application'
     id 'java-library'
-    id 'signing'
     id 'maven-publish'
 }
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri('https://public:\u0067hp_fya6Kseu3XOBMg2icbg7f1LP6ZFYjj35v4Zj@maven.pkg.github.com/cmosher01/*')
+    }
 }
 
 dependencies {
-    implementation group: 'nu.mine.mosher.gnopt', name: 'Gnopt', version: 'latest.release'
+    implementation group: 'nu.mine.mosher.gnopt', name: 'gnopt', version: 'latest.release'
 
     runtimeOnly group: 'xerces', name: 'xercesImpl', version: 'latest.release', {
         exclude group: 'xml-apis'
     }
-    runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release'
+    runtimeOnly group: 'net.sf.saxon', name: 'Saxon-HE', version: 'latest.release', {
+        exclude group: 'xml-apis'
+    }
 }
 
 application {
-    mainClassName = 'nu.mine.mosher.xml.XsltPipelineCli'
+    mainClass = 'nu.mine.mosher.xml.XsltPipelineCli'
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of 11
     }
-    withJavadocJar()
-    withSourcesJar()
 }
 
 publishing {
@@ -65,18 +67,13 @@ publishing {
 }
 tasks.assemble.dependsOn tasks.generatePomFileForMavenPublication
 
-signing {
-    sign publishing.publications.maven
-}
-tasks.assemble.dependsOn tasks.signMavenPublication
-
 publishing {
     repositories {
         maven {
-            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            url 'https://maven.pkg.github.com/cmosher01/xslt-pipeline'
             credentials {
-                username = ossrhUsername
-                password = ossrhPassword
+                username = System.getenv('GITHUB_ACTOR') ?: 'restricted'
+                password = System.getenv('GITHUB_TOKEN') ?: 'restricted'
             }
         }
     }
@@ -84,4 +81,4 @@ publishing {
 
 group = 'nu.mine.mosher.xml'
 
-version = '1.1.9'
+version = '1.2.0'

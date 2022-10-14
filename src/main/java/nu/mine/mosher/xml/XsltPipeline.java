@@ -69,6 +69,10 @@ public class XsltPipeline {
         traceHR();
         trace("final output");
         traceHR();
+        if (Objects.isNull(this.dom)) {
+            trace("[No DOM defined.]");
+            return;
+        }
         traceXml(this.dom);
         System.err.flush();
         TransformUtils.serialize(this.dom, out, this.pretty, this.xmldecl);
@@ -152,11 +156,17 @@ public class XsltPipeline {
         if (!this.trace) {
             return;
         }
+        if (Objects.isNull(source)) {
+            return;
+        }
         traceXml(DomUtils.asDom(source, false, Collections.emptyList()));
     }
 
     private void traceXml(final Node dom) throws IOException, TransformerException {
         if (!this.trace) {
+            return;
+        }
+        if (Objects.isNull(dom)) {
             return;
         }
         TransformUtils.serialize(dom, new BufferedOutputStream(new FileOutputStream(FileDescriptor.err)), true, true);
@@ -166,14 +176,23 @@ public class XsltPipeline {
         if (!this.trace) {
             return;
         }
-        System.err.println(label + ": " + url);
+        var u = Objects.isNull(url) ? "<null>" : url.toExternalForm();
+        if (Objects.isNull(label) || label.isBlank()) {
+            System.err.println(u);
+        } else {
+            System.err.println(label + ": " + u);
+        }
     }
 
     private void traceBool(final String label, final boolean b) {
         if (!this.trace) {
             return;
         }
-        System.err.println(label + ": " + b);
+        if (Objects.isNull(label) || label.isBlank()) {
+            System.err.println("" + b);
+        } else {
+            System.err.println(label + ": " + b);
+        }
     }
 
     private void traceHR() {
@@ -185,6 +204,9 @@ public class XsltPipeline {
 
     private void trace(final String message) {
         if (!this.trace) {
+            return;
+        }
+        if (Objects.isNull(message) || message.isBlank()) {
             return;
         }
         System.err.println(message);

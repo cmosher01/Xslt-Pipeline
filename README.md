@@ -6,7 +6,3 @@ Copyright © 2020, by Christopher Alan Mosher, Shelton, Connecticut, USA, cmoshe
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CVSSQ2BWDCKQ2)
 
 Runs an XML file through a pipeline of XSLT transformations.
-
-```sh
-xslt-pipeline input.xml param=value... transform.xslt...
-```

@@ -1,0 +1,18 @@
+plugins {
+    id 'nu.mine.mosher.xml.java-application-conventions'
+    id "org.beryx.runtime" version "1.12.7"
+}
+
+dependencies {
+    implementation project(':xslt-pipeline')
+    implementation group: 'nu.mine.mosher.gnopt', name: 'gnopt', version: 'latest.release'
+    runtimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: 'latest.release'
+}
+
+application {
+    mainClass = 'nu.mine.mosher.xml.XsltPipelineCli'
+}
+
+version = '1.3.0'
+
+tasks.assemble.dependsOn tasks.jpackage

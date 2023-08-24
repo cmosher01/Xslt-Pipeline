@@ -1,0 +1,10 @@
+plugins {
+    id 'nu.mine.mosher.xml.java-common-conventions'
+    id 'application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of 17
+    }
+}

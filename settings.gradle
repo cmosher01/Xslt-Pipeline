@@ -1,1 +1,10 @@
-rootProject.name="xslt-pipeline"
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
+}
+
+rootProject.name = 'xslt-pipeline'
+
+include 'app', 'lib'
+
+project(':app').name = 'xslt-pipeline-cli'
+project(':lib').name = 'xslt-pipeline'
